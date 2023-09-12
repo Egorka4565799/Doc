@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>File Upload and Greeting</title>
 </head>
@@ -7,9 +7,36 @@
 <h1>Welcome to File Upload and Greeting Page</h1>
 <p>Please select a file to upload:</p>
 
-<form action="templates/upload" method="post" enctype="multipart/form-data">
+<form th:action="@{/templates/upload}" method="post" enctype="multipart/form-data">
     <input type="file" name="file" id="file">
+    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
     <button type="submit">Upload</button>
 </form>
+
+<form id="deleteForm">
+    <input type="text" name="templateId">
+    <button type="button" id="deleteButton">Delete</button>
+</form>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $("#deleteButton").click(function() {
+            var templateId = $("input[name='templateId']").val();
+            $.ajax({
+                url: '/templates/delete/' + templateId,
+                type: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': $("input[name='_csrf']").val()
+                },
+                success: function(response) {
+                    alert('Template deleted successfully');
+                },
+                error: function() {
+                    alert('Error deleting template');
+                }
+            });
+        });
+    });
+</script>
 </body>
 </html>

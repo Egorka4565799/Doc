@@ -29,7 +29,9 @@ public class TemplateController {
             // Логика для сохранения файла в базе данных или файловой системе
             templateService.uploadTemplate(file);
             logger.info("Uploading finish");
+
             return ResponseEntity.ok("Template uploaded successfully");
+
         } catch (Exception e){
             logger.error("Error uploading ex:{}",e.getMessage(),e);
             return ResponseEntity.status(HttpStatusCode.valueOf(404)).body("ERROR DURING UPLOAD");
