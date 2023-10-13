@@ -20,8 +20,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
         http
-                //.csrf(csrf ->
-                        //csrf.disable()) // Отключение CSRF защиты
+                .csrf(csrf ->
+                        csrf.disable()) // Отключение CSRF защиты
                 .authorizeRequests(authorizeRequests ->
                         authorizeRequests
                                 // Разрешаем доступ для всех авторизованных пользователей к URL /templates и /documents и их дочерним URL

@@ -2,5 +2,7 @@ package docGenerate.Doc.models;
 
 public enum DocumentFormat {
     PDF,
-    DOCX
+    DOCX,
+    RTF,
+    ODT
 }

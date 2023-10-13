@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Generate Document Form</title>
+</head>
+<body>
+<h1>Generate Document Form</h1>
+<form id="generateDocumentForm" method="post">
+  <label for="format">Select Format:</label>
+  <select id="format" name="format">
+    <option value="DOCX">DOCX</option>
+    <option value="PDF">PDF</option>
+    <option value="ODT">ODT</option>
+  </select>
+  <br>
+
+  <!-- Создание полей ввода на основе ключей из модели
+  <div id="variables">
+      <div th:each="key : ${wordList}">
+          <label th:for="${key}" th:text="${key}"></label>
+          <input type="text" th:id="${key}" th:name="${key}">
+          <br>
+      </div>
+  </div>-->
+
+  <input type="submit" value="Generate Document">
+</form>
+
+<div id="result"></div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    const currentUrl = window.location.href;
+    const id = currentUrl.split('/documents/').pop(); // Получаем значение {id} из текущего URL
+
+   $("#generateDocumentForm").submit(function (event) {
+        event.preventDefault();
+
+        const format = $("#format").val();
+
+        // Создаем объект FormData для отправки формы
+        const formData = new FormData(this);
+
+        $.ajax({
+            type: "POST",
+            url: `/documents/${id}/generate`, // Используем текущий URL
+            data: formData, // Отправляем данные формы
+            processData: false, // Не обрабатываем данные
+            contentType: 'application/json', // Не устанавливаем тип контента
+            success: function (result) {
+                $("#result").html(`<p>Document generated successfully. Download link: <a href="${result.downloadLink}">Download</a></p>`);
+            },
+            error: function (error) {
+                $("#result").html(`<p>Error generating document: ${error.message}</p>`);
+            }
+        });
+    });
+</script>
+</body>
+</html>
+

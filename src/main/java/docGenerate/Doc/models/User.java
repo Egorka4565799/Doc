@@ -3,10 +3,13 @@ package docGenerate.Doc.models;
 
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Entity
@@ -32,16 +35,20 @@ public class User implements UserDetails {
 
     @Transient
     private String confirmPassword; // Для подтверждения пароля
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Template> templates = new HashSet<>(); // Связь один ко многим с шаблонами
+
     @ManyToMany(fetch = FetchType.EAGER)
     private Set<Role> roles;
 
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Здесь вы можете предоставить роли (GrantedAuthority) для пользователя
-        // Например, можно использовать Set<GrantedAuthority> для хранения ролей пользователя
-        // И вернуть их здесь
-        return getRoles();
+
+        return getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority(role.getName()))
+                .collect(Collectors.toList());
     }
 
     //------------------ Другие методы UserDetails -----------------------------------
@@ -65,8 +72,50 @@ public class User implements UserDetails {
     // ---------------------- Констуркторы ------------------------
     public User() {}
 
+    public void userUpdate(String username, String name) {
+        if(username!=null)
+            this.username = username;
+        if(name!=null)
+            this.name = name;
+
+    }
+
     // ---------------------- Гетеры и сетеры ------------------------
 
+    public void plusDownload(){
+        countDownload++;
+    }
+
+    // Геттер и сеттер для связи с шаблонами
+
+    public int GetCountTemplates(){
+        return templates.size();
+    }
+
+    public Set<Template> getTemplates() {
+        return templates;
+    }
+
+    public void setTemplates(Set<Template> templates) {
+        this.templates = templates;
+    }
+
+    // Метод для добавления шаблона к пользователю
+    public void addTemplate(Template template) {
+        template.setUser(this);
+        templates.add(template);
+    }
+
+    // Метод для удаления шаблона у пользователя
+    public void removeTemplate(Template template) {
+        templates.remove(template);
+        template.setUser(null);
+    }
+
+
+    public void addRole(Role role) {
+        roles.add(role);
+    }
     public Set<Role> getRoles() {
         return roles;
     }

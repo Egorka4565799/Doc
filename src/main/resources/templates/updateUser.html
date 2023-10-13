@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Registration</title>
+</head>
+<body>
+<form  th:action="@{/users/update}" method="post">
+    <div>
+        <label for="username">Имя пользователя:</label>
+        <input type="text" id="username" name="username" required/>
+    </div>
+
+    <div>
+        <label for="name">Имя:</label>
+        <input type="text" id="name" name="name" required/>
+    </div>
+
+    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+    <div>
+        <button type="submit" value="Register">Изменить</button>
+    </div>
+
+</form>
+</body>
+</html>
