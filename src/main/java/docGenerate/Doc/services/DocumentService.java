@@ -196,6 +196,8 @@ public class DocumentService {
         } else if (DocumentFormat.PDF.equals(format)) {
             // Если нужен PDF, сохраняем документ в этом формате
             doc.save(outputStream, SaveFormat.PDF);
+
+
         } else {
             throw new IllegalArgumentException("Unsupported format");
         }

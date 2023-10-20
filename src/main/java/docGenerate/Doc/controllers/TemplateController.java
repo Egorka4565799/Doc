@@ -34,14 +34,14 @@ public class TemplateController {
         logger.info("Uploading starting...");
         try{
             if(file.isEmpty()){
-                return ResponseEntity.badRequest().body("File is empty");
+                return ResponseEntity.badRequest().body("The file is empty, please attach the file");
             }
 
             // Извлекаем пользователя из UserDetails
             User user = userService.findUserByUsername(userDetails.getUsername());
 
             if (user == null) {
-                return ResponseEntity.status(HttpStatusCode.valueOf(404)).body("User not found");
+                return ResponseEntity.status(HttpStatusCode.valueOf(404)).body("The user is not found, please log in");
             }
 
 
@@ -53,7 +53,7 @@ public class TemplateController {
 
         } catch (Exception e){
             logger.error("Error uploading ex:{}",e.getMessage(),e);
-            return ResponseEntity.status(HttpStatusCode.valueOf(404)).body("ERROR DURING UPLOAD");
+            return ResponseEntity.status(HttpStatusCode.valueOf(500)).body("Failed to upload file");
         }
 
     }
@@ -64,6 +64,14 @@ public class TemplateController {
             @RequestParam("file") MultipartFile file,
             @AuthenticationPrincipal User user) throws IOException {
 
+        if(file.isEmpty()){
+            return ResponseEntity.badRequest().body("The file is empty, please attach the file");
+        }
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatusCode.valueOf(404)).body("The user is not found, please log in");
+        }
+
         if (user.getRoles() != null && user.getRoles().stream().anyMatch(role -> "ROLE_ADMIN".equals(role.getName()))) {
             // Логика для обновления файла шаблона по идентификатору
             templateService.updateTemplate(templateId, file);
@@ -73,7 +81,7 @@ public class TemplateController {
                 templateService.updateTemplate(templateId, file);
                 return ResponseEntity.ok("Template updated successfully");
             }
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not have template");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You can't change a file that doesn't belong to you");
         }
 
 
@@ -85,6 +93,9 @@ public class TemplateController {
             @PathVariable Long templateId,
             @AuthenticationPrincipal User user) {
 
+        if (user == null) {
+            return ResponseEntity.status(HttpStatusCode.valueOf(404)).body("The user is not found, please log in");
+        }
 
         if (user.getRoles() != null && user.getRoles().stream().anyMatch(role -> "ROLE_ADMIN".equals(role.getName()))) {
             templateService.deleteTemplate(templateId);
@@ -94,7 +105,7 @@ public class TemplateController {
                 templateService.deleteTemplate(templateId);
                 return ResponseEntity.ok("Template deleted successfully");
             }
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not have template");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The user does not have this template");
         }
 
 

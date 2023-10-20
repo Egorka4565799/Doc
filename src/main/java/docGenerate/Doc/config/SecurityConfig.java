@@ -1,11 +1,9 @@
 package docGenerate.Doc.config;
 
-import docGenerate.Doc.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -25,7 +23,7 @@ public class SecurityConfig {
                 .authorizeRequests(authorizeRequests ->
                         authorizeRequests
                                 // Разрешаем доступ для всех авторизованных пользователей к URL /templates и /documents и их дочерним URL
-                                .requestMatchers("/templates/**", "/documents/**").authenticated()
+                                .requestMatchers("/templates/**", "/documents/**","/user/**").authenticated()
                                 // Запрещаем доступ к URL /admin и его дочерним URL для всех кроме пользователей с ролью "ADMIN"
                                 .requestMatchers("/admin/**").hasRole("ADMIN")
                                 // Все остальные URL не требуют аутентификации

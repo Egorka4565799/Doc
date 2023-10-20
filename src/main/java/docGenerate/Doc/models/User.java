@@ -2,6 +2,7 @@ package docGenerate.Doc.models;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,13 +22,20 @@ public class User implements UserDetails {
     private Long id;
 
     @Column(name = "username", unique = true, nullable = false)
+    @NotNull(message = "Username is required")
+    @Size(min = 4, max = 50, message = "Username must be between 4 and 50 characters")
     private String username;
     @Column(name = "password", nullable = false)
+    @NotNull(message = "Password is required")
+    @Size(min = 6, message = "Password must be at least 6 characters")
     private String password;
 
 
 
     @Column(name = "name", nullable = false)
+    @NotEmpty(message = "Name is required")
+    @Size(min = 3, message = "Name must be at least 3 characters")
+    @Pattern(regexp = "^[a-zA-Zа-яА-Я ]*$", message = "Name can only contain letters and spaces")
     private String name;
     @Column(name = "count_download")
     private int countDownload;

@@ -2,6 +2,7 @@ package docGenerate.Doc.controllers;
 
 import docGenerate.Doc.models.DTOs.UserFullDTO;
 import docGenerate.Doc.models.User;
+import docGenerate.Doc.models.ValidationResponse;
 import docGenerate.Doc.services.UserService;
 
 import jakarta.validation.Valid;
@@ -10,42 +11,59 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/user")
 public class UserController {
 
     @Autowired
     private UserService userService;
 
-    @PostMapping("/update")
-    public ResponseEntity<String> updateUser(@Valid User userForm,
+    @PutMapping("/update")
+    public ResponseEntity<?> updateUser(@Valid User userForm,
                                              BindingResult bindingResult,
                                              @AuthenticationPrincipal User userDetails)
     {
 
+        ValidationResponse vr = new ValidationResponse();
         if (bindingResult.hasErrors()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Validation error");
+            Map<String,String> errors = new HashMap<>();
+            // Получение ошибок полей
+            List<FieldError> fieldErrors = bindingResult.getFieldErrors();
+            for (FieldError fieldError : fieldErrors) {
+                String fieldName = fieldError.getField(); // Имя поля
+                String errorMessage = fieldError.getDefaultMessage(); // Сообщение об ошибке
+                errors.put(fieldName,errorMessage);
+            }
+            vr.setErrors(errors);
+            vr.setMessage("Validation error");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(vr);
         }
 
         // Проверка, существует ли пользователь с указанным userId
         User existingUser = userService.findUserById(userDetails.getId());
         if (existingUser == null) {
+
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
 
         if (!userService.updateUser(userDetails.getId(), userForm)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not update (error)");
-        }
 
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("failed to update user");
+        }
+        vr.setMessage("User successfully update");
         return ResponseEntity.status(HttpStatus.OK).body("User successfully update");
     }
 
-    @GetMapping("/delete")
-    public ResponseEntity<String> updateUser(@AuthenticationPrincipal User userDetails)
+    @DeleteMapping("/delete")
+    public ResponseEntity<String> deleteUser(@AuthenticationPrincipal User userDetails)
     {
         // Проверка, существует ли пользователь с указанным userId
         User existingUser = userService.findUserById(userDetails.getId());
@@ -54,15 +72,21 @@ public class UserController {
         }
 
         if (!userService.deleteUser(userDetails.getId())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not delete (error)");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to delete user");
         }
 
-        return ResponseEntity.status(HttpStatus.OK).body("User successfully delete");
+        return ResponseEntity.status(HttpStatus.OK).body("The user has been successfully deleted");
     }
 
 
     @GetMapping("/show")
-    public ResponseEntity<UserFullDTO> getUsers(@AuthenticationPrincipal User userDetails) {
+    public ResponseEntity<?> getUser(@AuthenticationPrincipal User userDetails) {
+
+        // Проверка, существует ли пользователь с указанным userId
+        User existingUser = userService.findUserById(userDetails.getId());
+        if (existingUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
         UserFullDTO userFullDTO = userService.getUser(userDetails.getId());
 
         return ResponseEntity.status(HttpStatus.OK).body(userFullDTO);
